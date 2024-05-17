@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout</title>
+    <link rel="stylesheet" href="asset/css/checkout.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Checkout</h1>
+      <div class="summary">
+        <div class="total-amount">
+          <h2>Total Amount to Pay</h2>
+          <p>$19.00</p>
+        </div>
+        <div class="qr-code">
+          <h2>Scan to Pay</h2>
+          <img
+            src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Pay%20$19.00"
+            alt="QR Code"
+          />
+        </div>
+      </div>
+      <button class="complete-btn">Complete Purchase</button>
+    </div>
+  </body>
+</html>
