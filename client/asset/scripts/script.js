@@ -1,51 +1,49 @@
 var InitialCount = -1;
 
+const deleteProducts = async () => {
+  url = "https://swiftpayindia-b4f8cce016d8.herokuapp.com/product";
 
+  let res = await axios.get(url);
+  responseText = res.data;
+  const products = responseText;
 
-const deleteProducts = async() => {
-    url = 'https://automaticbilling.herokuapp.com/product';
+  for (let product of products) {
+    const response = await axios.delete(
+      `https://swiftpayindia-b4f8cce016d8.herokuapp.com/product/${product.id}`
+    );
+  }
+  location.reload();
+  window.scroll({
+    top: 0,
+    left: 0,
+    behavior: "smooth",
+  });
+};
 
-    let res = await axios.get(url);
-    responseText = res.data;
+const loadProducts = async () => {
+  url = "https://swiftpayindia-b4f8cce016d8.herokuapp.com/product";
+
+  let res = await axios.get(url);
+  responseText = await res.data;
+  const products = responseText;
+  var len = products.length;
+
+  if (len > InitialCount + 1) {
+    $("#1").css("display", "none");
+    $("#home").css("display", "grid");
+    $("#2").css("display", "grid");
+    var payable = 0;
     const products = responseText;
-
+    console.log(products);
     for (let product of products) {
-        const response = await axios.delete(`https://automaticbilling.herokuapp.com/product/${product.id}`)
-
+      payable = payable + parseFloat(product.payable);
     }
-    location.reload();
-    window.scroll({
-        top: 0,
-        left: 0,
-        behavior: 'smooth'
-    });
-}
 
-const loadProducts = async() => {
-    url = 'https://automaticbilling.herokuapp.com/product';
-
-    let res = await axios.get(url);
-    responseText = await res.data;
-    const products = responseText;
-    var len = products.length;
-
-    if (len > InitialCount + 1) {
-        $("#1").css("display", "none");
-        $("#home").css("display", "grid");
-        $("#2").css("display", "grid");
-        var payable = 0;
-        const products = responseText;
-        console.log(products);
-        for (let product of products) {
-            payable = payable + parseFloat(product.payable);
-
-        }
-
-        var product = products.pop();
-        const x = `
+    var product = products.pop();
+    const x = `
         <section>
                 <div class="card card-long animated fadeInUp once">
-                    <img src="asset/img/${product.id}.jpg" class="album">
+                    <img src="asset/img/${product.id}.png" class="album">
                     <div class="span1">Product Name</div>
                     <div class="card__product">
                         <span>${product.name}</span>
@@ -66,54 +64,52 @@ const loadProducts = async() => {
                 </div>
             </section>
         <section>
-        `
+        `;
 
-        document.getElementById('home').innerHTML = document.getElementById('home').innerHTML + x;
-        document.getElementById('2').innerHTML = "CHECKOUT $" + payable;
-        InitialCount += 1;
-    }
+    document.getElementById("home").innerHTML =
+      document.getElementById("home").innerHTML + x;
+    document.getElementById("2").innerHTML = "CHECKOUT $" + payable;
+    InitialCount += 1;
+  }
+};
 
+var checkout = async () => {
+  document.getElementById("2").innerHTML =
+    "<span class='loader-16' style='margin-left: 44%;'></span>";
+  var payable = 0;
+  url = "https://swiftpayindia-b4f8cce016d8.herokuapp.com/product";
 
-}
+  let res = await axios.get(url);
+  responseText = await res.data;
+  products = responseText;
 
-var checkout = async() => {
-    document.getElementById('2').innerHTML = "<span class='loader-16' style='margin-left: 44%;'></span>"
-    var payable = 0;
-    url = 'https://automaticbilling.herokuapp.com/product';
+  for (let product of products) {
+    payable = payable + parseFloat(product.payable);
+  }
 
-    let res = await axios.get(url);
-    responseText = await res.data;
-    products = responseText;
+  var url =
+    "https://qrapi.io/v2/qrcode/text?data=upi%3A%2F%2Fpay%3Fpa%3Dethenbiju%40oksbi%26pn%3DEthen%2520Biju%26aid%3DuGICAgIC_4rOMUg&size=l&custom_size=400&error_correction=M&data_pattern=RECT&eye_pattern=TLBR_LEAF&data_gradient_style=Radial&data_gradient_start_color=%232302c8db&data_gradient_end_color=%232302c8db&eye_color_inner=%232302c8db&eye_color_outer=%232302c8db&background_color=%2323ecf0f3&logo.url=https%3A%2F%2Fqrapi.s3.amazonaws.com%2FMedia%2FPaypal.png&logo.size=15&logo.excavated=true&logo.angle=0&logo.cache=true&poster.left=50&poster.top=50&poster.size=40&poster.eyeshape=ROUND_RECT&poster.dataPattern=ROUND&format=png";
 
-    for (let product of products) {
-        payable = payable + parseFloat(product.payable);
-    }
+  await fetch(url)
+    .then(function (data) {
+      return data.blob();
+    })
+    .then(function (img) {
+      var image = URL.createObjectURL(img);
+      $("#home").css("display", "none");
+      $("#final").css("display", "none");
+      window.scroll({
+        top: 0,
+        left: 0,
+        behavior: "smooth",
+      });
+      $("#image").attr("src", image);
+      $("#qr").css("display", "grid");
+    });
+  setTimeout(function () {
+    $("#qr").css("display", "none");
+    $("#success").css("display", "grid");
+  }, 10000);
 
-    var url = "https://api.scanova.io/v2/qrcode/text?data=upi%3A%2F%2Fpay%3Fpa%3Dshebinjosejacob2014%40oksbi%26pn%3DTXN965654954321%26tn%3DA%26am%3D4%26cu%3DINR%26url%3Dhttps%3A%2F%2Fcoderscafe.cf%2F&size=l&error_correction=M&data_pattern=RECT&eye_pattern=TLBR_LEAF&data_gradient_style=Radial&data_gradient_start_color=%2302c8db&data_gradient_end_color=%2302c8db&eye_color_inner=%2302c8db&eye_color_outer=%2302c8db&background_color=%23ecf0f3&logo.size=15&logo.excavated=true&logo.angle=0&poster.left=50&poster.top=50&poster.size=40&poster.eyeshape=ROUND_RECT&poster.dataPattern=ROUND&format=png&apikey=fmdtvmmwccekndkpalsltpzhvfmnpsmuhrvhpxzf";
-
-    await fetch(url)
-        .then(function(data) {
-            return data.blob();
-        })
-        .then(function(img) {
-            var image = URL.createObjectURL(img);
-            $("#home").css("display", "none");
-            $("#final").css("display", "none");
-            window.scroll({
-                top: 0,
-                left: 0,
-                behavior: 'smooth'
-            });
-            $('#image').attr('src', image);
-            $("#qr").css("display", "grid");
-
-        });
-    setTimeout(function(){
-        $("#qr").css("display", "none");
-        $("#success").css("display", "grid");
-            },10000);
-        
-
-    // window.location.href = "upi://pay?pa=shebinjosejacob2014@oksbi&pn=TXN9656549238&tn=A&am=1&cu=INR&url=https://assettracker.cf/"*/
-    deleteProducts();
-}
+  deleteProducts();
+};
