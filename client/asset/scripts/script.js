@@ -1,14 +1,13 @@
 var InitialCount = -1;
 
 const deleteProducts = async () => {
-  url = "https://swiftpayindia-b4f8cce016d8.herokuapp.com/product";
+  const url = "https://swiftpayindia-b4f8cce016d8.herokuapp.com/product";
 
   let res = await axios.get(url);
-  responseText = res.data;
-  const products = responseText;
+  const products = res.data;
 
   for (let product of products) {
-    const response = await axios.delete(
+    await axios.delete(
       `https://swiftpayindia-b4f8cce016d8.herokuapp.com/product/${product.id}`
     );
   }
@@ -21,11 +20,10 @@ const deleteProducts = async () => {
 };
 
 const loadProducts = async () => {
-  url = "https://swiftpayindia-b4f8cce016d8.herokuapp.com/product";
+  const url = "https://swiftpayindia-b4f8cce016d8.herokuapp.com/product";
 
   let res = await axios.get(url);
-  responseText = await res.data;
-  const products = responseText;
+  const products = res.data;
   var len = products.length;
 
   if (len > InitialCount + 1) {
@@ -33,7 +31,6 @@ const loadProducts = async () => {
     $("#home").css("display", "grid");
     $("#2").css("display", "grid");
     var payable = 0;
-    const products = responseText;
     console.log(products);
     for (let product of products) {
       payable = payable + parseFloat(product.payable);
@@ -48,7 +45,9 @@ const loadProducts = async () => {
                     <div class="card__product">
                         <span>${product.name}</span>
                     </div>
-                    <div class="span2">Per Unit</div>
+                    <div class="span2">${
+                      product.unit === "U" ? "Per Unit" : "Per kg"
+                    }</div>
                     <div class="card__price">
                         <span>${product.price} </span>
                     </div>
@@ -68,29 +67,33 @@ const loadProducts = async () => {
 
     document.getElementById("home").innerHTML =
       document.getElementById("home").innerHTML + x;
-    document.getElementById("2").innerHTML = "CHECKOUT $" + payable;
+    document.getElementById("2").innerHTML = "CHECKOUT ₹" + payable;
     InitialCount += 1;
   }
 };
 
-var checkout = async () => {
+const checkout = async () => {
   document.getElementById("2").innerHTML =
     "<span class='loader-16' style='margin-left: 44%;'></span>";
   var payable = 0;
-  url = "https://swiftpayindia-b4f8cce016d8.herokuapp.com/product";
+  const url = "https://swiftpayindia-b4f8cce016d8.herokuapp.com/product";
 
   let res = await axios.get(url);
-  responseText = await res.data;
-  products = responseText;
+  const products = res.data;
 
   for (let product of products) {
     payable = payable + parseFloat(product.payable);
   }
 
-  var url =
-    "https://qrapi.io/v2/qrcode/text?data=upi%3A%2F%2Fpay%3Fpa%3Dethenbiju%40oksbi%26pn%3DEthen%2520Biju%26aid%3DuGICAgIC_4rOMUg&size=l&custom_size=400&error_correction=M&data_pattern=RECT&eye_pattern=TLBR_LEAF&data_gradient_style=Radial&data_gradient_start_color=%232302c8db&data_gradient_end_color=%232302c8db&eye_color_inner=%232302c8db&eye_color_outer=%232302c8db&background_color=%2323ecf0f3&logo.url=https%3A%2F%2Fqrapi.s3.amazonaws.com%2FMedia%2FPaypal.png&logo.size=15&logo.excavated=true&logo.angle=0&logo.cache=true&poster.left=50&poster.top=50&poster.size=40&poster.eyeshape=ROUND_RECT&poster.dataPattern=ROUND&format=png";
+  const payeeVPA = "ethenbiju@oksbi";
+  const payeeName = "Ethen Biju";
+  const currency = "INR";
+  const googlePayURL = `upi://pay?pa=${payeeVPA}&pn=${payeeName}&am=${payable}&cu=${currency}`;
+  const qrCodeAPI = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(
+    googlePayURL
+  )}`;
 
-  await fetch(url)
+  await fetch(qrCodeAPI)
     .then(function (data) {
       return data.blob();
     })
@@ -106,6 +109,7 @@ var checkout = async () => {
       $("#image").attr("src", image);
       $("#qr").css("display", "grid");
     });
+
   setTimeout(function () {
     $("#qr").css("display", "none");
     $("#success").css("display", "grid");
@@ -113,3 +117,5 @@ var checkout = async () => {
 
   deleteProducts();
 };
+
+document.addEventListener("DOMContentLoaded", loadProducts);
